@@ -5,10 +5,11 @@ import { supabaseAdmin } from "@/utils/supabase-admin";
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Routine not found" }, { status: 404 });
     }
 
-    if (routine.user_id !== session.user.id) {
+    if (routine.user_id !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
         .from("task_completions")
         .select("*")
         .eq("routine_id", routineId)
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .eq("date", date)
         .maybeSingle();
 
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
         .from("task_completions")
         .insert({
           routine_id: routineId,
-          user_id: session.user.id,
+          user_id: user.id,
           date: date,
           completed: completed === true,
         })
@@ -96,10 +97,11 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -118,7 +120,7 @@ export async function GET(request: Request) {
         routine:routines(*)
       `
       )
-      .eq("user_id", session.user.id)
+      .eq("user_id", user.id)
       .eq("date", date);
 
     if (error) throw error;

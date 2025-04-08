@@ -6,6 +6,9 @@ export interface Routine {
   end_time: string;
   created_at: string;
   updated_at: string;
+  taskName?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface TaskCompletion {

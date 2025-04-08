@@ -5,10 +5,11 @@ import { supabaseAdmin } from "@/utils/supabase-admin";
 export async function GET() {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -34,10 +35,11 @@ export async function GET() {
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
     const { data: routine, error } = await supabase
       .from("routines")
       .insert({
-        user_id: session.user.id,
+        user_id: user.id,
         task_name: taskName,
         start_time: startTime,
         end_time: endTime,

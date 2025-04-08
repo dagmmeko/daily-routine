@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase-server";
 import { supabaseAdmin } from "@/utils/supabase-admin";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-export async function PUT(request: Request, context: Context) {
-  const { id } = context.params;
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   const supabase = await createClient();
   const {
     data: { session },
@@ -68,8 +65,11 @@ export async function PUT(request: Request, context: Context) {
   }
 }
 
-export async function DELETE(request: Request, context: Context) {
-  const { id } = context.params;
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   const supabase = await createClient();
   const {
     data: { session },
