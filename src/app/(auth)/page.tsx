@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import RoutineItem from "@/components/RoutineItem";
+import CompletionTimeStats from "@/components/CompletionTimeStats";
 import { Routine, TaskCompletion } from "@/types";
 import { format } from "date-fns";
 
@@ -49,11 +50,13 @@ export default function DailyRoutine() {
     fetchData();
   }, [selectedDate]);
 
-  // Handle toggling task completion
+  // Handle toggling task completion with actual times
   const handleToggleComplete = async (
     routineId: string,
     date: string,
-    completed: boolean
+    completed: boolean,
+    actualStartTime?: string,
+    actualEndTime?: string
   ) => {
     try {
       const res = await fetch("/api/completion", {
@@ -65,6 +68,8 @@ export default function DailyRoutine() {
           routineId,
           date,
           completed,
+          actual_start_time: actualStartTime,
+          actual_end_time: actualEndTime,
         }),
       });
 
@@ -99,7 +104,7 @@ export default function DailyRoutine() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Today&apos;s Routine
         </h1>
@@ -158,26 +163,58 @@ export default function DailyRoutine() {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             Get started by creating your daily routine.
           </p>
-          <a
-            href="/edit-routine"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Create Routine
-          </a>
+          <div className="flex gap-3 justify-center">
+            <a
+              href="/edit-routine"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Create Routine
+            </a>
+            <a
+              href="/manage-routines"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+            >
+              Manage Schedules
+            </a>
+          </div>
         </div>
       )}
 
       {!loading && !error && routines.length > 0 && (
-        <div className="space-y-1">
-          {routines.map((routine) => (
-            <RoutineItem
-              key={routine.id}
-              routine={routine}
-              date={selectedDate}
-              completion={completionMap[routine.id]}
-              onComplete={handleToggleComplete}
-            />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-4">
+            {routines.map((routine) => (
+              <RoutineItem
+                key={routine.id}
+                routine={routine}
+                date={selectedDate}
+                completion={completionMap[routine.id]}
+                onComplete={handleToggleComplete}
+              />
+            ))}
+          </div>
+
+          <div className="md:col-span-1">
+            <CompletionTimeStats />
+
+            <div className="mt-4 bg-card p-4 rounded-lg shadow-sm">
+              <h3 className="text-xl font-semibold mb-2">Routine Management</h3>
+              <div className="flex flex-col space-y-2">
+                <a
+                  href="/edit-routine"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded text-center"
+                >
+                  Edit Routines
+                </a>
+                <a
+                  href="/manage-routines"
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded text-center"
+                >
+                  Manage Schedules
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

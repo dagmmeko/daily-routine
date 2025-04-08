@@ -14,7 +14,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { routineId, date, completed } = await request.json();
+    const { routineId, date, completed, actual_start_time, actual_end_time } =
+      await request.json();
 
     if (!routineId || !date) {
       return NextResponse.json(
@@ -54,11 +55,17 @@ export async function POST(request: Request) {
 
     if (existingCompletions) {
       // Update the existing completion
+      const updateData: any = {
+        completed: completed === true,
+      };
+
+      // Only add actual times if they're provided
+      if (actual_start_time) updateData.actual_start_time = actual_start_time;
+      if (actual_end_time) updateData.actual_end_time = actual_end_time;
+
       const { data: updatedCompletion, error: updateError } = await supabase
         .from("task_completions")
-        .update({
-          completed: completed === true,
-        })
+        .update(updateData)
         .eq("id", existingCompletions.id)
         .select()
         .single();
@@ -68,14 +75,20 @@ export async function POST(request: Request) {
       result = updatedCompletion;
     } else {
       // Create a new completion
+      const insertData: any = {
+        routine_id: routineId,
+        user_id: user.id,
+        date: date,
+        completed: completed === true,
+      };
+
+      // Only add actual times if they're provided
+      if (actual_start_time) insertData.actual_start_time = actual_start_time;
+      if (actual_end_time) insertData.actual_end_time = actual_end_time;
+
       const { data: newCompletion, error: insertError } = await supabase
         .from("task_completions")
-        .insert({
-          routine_id: routineId,
-          user_id: user.id,
-          date: date,
-          completed: completed === true,
-        })
+        .insert(insertData)
         .select()
         .single();
 

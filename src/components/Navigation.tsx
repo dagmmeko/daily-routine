@@ -54,6 +54,12 @@ export function Navigation() {
                 >
                   Edit Routine
                 </Link>
+                <Link
+                  href="/manage-routines"
+                  className={isActive("/manage-routines")}
+                >
+                  Manage Schedules
+                </Link>
                 <Link href="/performance" className={isActive("/performance")}>
                   Performance
                 </Link>
@@ -114,6 +120,12 @@ export function Navigation() {
             className={isActive("/edit-routine") + " block"}
           >
             Edit Routine
+          </Link>
+          <Link
+            href="/manage-routines"
+            className={isActive("/manage-routines") + " block"}
+          >
+            Manage Schedules
           </Link>
           <Link
             href="/performance"
