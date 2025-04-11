@@ -1,6 +1,48 @@
-# Daily Routine Tracker
+# Daily Routine App
 
-A web application that helps users manage their daily weekday routine, track their adherence to the schedule, and view weekly performance metrics.
+A task management application for daily routines.
+
+## Fixes Applied
+
+To fix the issues with data schema synchronization and type safety:
+
+1. Updated all API routes to use the newer `@supabase/ssr` approach with `createClient()` instead of the deprecated `createRouteHandlerClient`.
+
+2. Improved TypeScript interfaces in `src/types/index.ts` with proper documentation and nullable types.
+
+3. Fixed API routes to properly use typed data structures.
+
+4. Created database migration files to ensure schema consistency:
+   - `migrations/fix_task_completions.sql`: Ensures required columns exist
+   - `migrations/fix_database_schema.sql`: Comprehensive schema fixes for all tables
+
+## To Apply Database Changes
+
+Run the following SQL migrations in your Supabase database:
+
+1. Apply the migrations in the `migrations` folder through the Supabase SQL editor.
+
+2. Restart your application.
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## Type Safety
+
+The application now has full type safety between frontend and backend through:
+
+1. Shared TypeScript interfaces in `src/types/index.ts`
+2. Properly typed database operations
+3. Consistent naming conventions
 
 ## Features
 
@@ -103,6 +145,57 @@ The app can be easily deployed on Vercel:
 - **User**: Stores user information linked to Supabase Auth
 - **Routine**: Stores the user's daily routine tasks
 - **TaskCompletion**: Tracks task completion status for specific days
+
+## Database Schema Synchronization
+
+To ensure your hosted database schema matches the local schema, follow these steps:
+
+1. Log in to your Supabase dashboard
+2. Navigate to the SQL Editor
+3. Run the complete synchronization script from `migrations/complete_db_sync.sql`
+
+This script will:
+
+- Create all required tables if they don't exist
+- Adjust column types to match TypeScript interfaces
+- Set up required constraints
+- Configure proper row-level security policies
+- Set up necessary triggers
+
+After running the migration, restart your application. The database schema will now match your local types and the application should function without type mismatches.
+
+## Schema Overview
+
+The schema uses the following structure:
+
+```
+- routines
+  - id: UUID (PK)
+  - user_id: UUID (FK to auth.users)
+  - task_name: TEXT
+  - start_time: TEXT
+  - end_time: TEXT
+  - created_at: TIMESTAMP WITH TIME ZONE
+  - updated_at: TIMESTAMP WITH TIME ZONE
+
+- routine_schedules
+  - id: UUID (PK)
+  - user_id: UUID (FK to auth.users)
+  - routine_id: UUID (FK to routines)
+  - day_of_week: INTEGER (0-6)
+  - created_at: TIMESTAMP WITH TIME ZONE
+  - updated_at: TIMESTAMP WITH TIME ZONE
+
+- task_completions
+  - id: UUID (PK)
+  - user_id: UUID (FK to auth.users)
+  - routine_id: UUID (FK to routines)
+  - date: DATE
+  - completed: BOOLEAN
+  - actual_start_time: TIMESTAMP WITH TIME ZONE (nullable)
+  - actual_end_time: TIMESTAMP WITH TIME ZONE (nullable)
+  - created_at: TIMESTAMP WITH TIME ZONE
+```
 
 ## License
 

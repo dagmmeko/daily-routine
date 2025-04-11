@@ -10,6 +10,13 @@ export default function EditRoutinePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Expose setRoutines for testing
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__setRoutinesForTest = setRoutines;
+    }
+  }, []);
+
   // Form state for a new routine item
   const [newRoutine, setNewRoutine] = useState({
     taskName: "",
@@ -30,7 +37,13 @@ export default function EditRoutinePage() {
         }
 
         const data = await res.json();
+        console.log("Fetched routines:", data); // Debug log to inspect data
         setRoutines(data);
+
+        // Expose routines for testing purposes
+        if (typeof window !== "undefined") {
+          (window as any).__routines = data;
+        }
       } catch (err) {
         console.error("Error fetching routines:", err);
         setError("Failed to load your routines. Please try again.");
@@ -198,7 +211,13 @@ export default function EditRoutinePage() {
 
   const startEditing = (routine: Routine) => {
     setEditingId(routine.id);
-    setEditForm({ ...routine });
+    setEditForm({
+      ...routine,
+      // Make sure we always have camelCase fields populated
+      taskName: routine.taskName || routine.task_name,
+      startTime: routine.startTime || routine.start_time,
+      endTime: routine.endTime || routine.end_time,
+    });
   };
 
   const cancelEditing = () => {
@@ -452,7 +471,7 @@ export default function EditRoutinePage() {
                       <div>
                         <div className="flex justify-between items-center">
                           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            {routine.taskName}
+                            {routine.taskName || routine.task_name}
                           </h3>
                           <div className="flex space-x-2">
                             <button
@@ -470,7 +489,8 @@ export default function EditRoutinePage() {
                           </div>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {routine.startTime} - {routine.endTime}
+                          {routine.startTime || routine.start_time} -{" "}
+                          {routine.endTime || routine.end_time}
                         </p>
                       </div>
                     )}

@@ -22,7 +22,22 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json(routines);
+    // Map snake_case to camelCase field names for frontend compatibility
+    const mappedRoutines = routines.map((routine) => ({
+      id: routine.id,
+      user_id: routine.user_id,
+      task_name: routine.task_name,
+      start_time: routine.start_time,
+      end_time: routine.end_time,
+      created_at: routine.created_at,
+      updated_at: routine.updated_at,
+      // Add camelCase versions for frontend use
+      taskName: routine.task_name,
+      startTime: routine.start_time,
+      endTime: routine.end_time,
+    }));
+
+    return NextResponse.json(mappedRoutines);
   } catch (error) {
     console.error("Error fetching routines:", error);
     return NextResponse.json(

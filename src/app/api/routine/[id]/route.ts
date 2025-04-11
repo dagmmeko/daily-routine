@@ -55,7 +55,15 @@ export async function PUT(
 
     if (updateError) throw updateError;
 
-    return NextResponse.json(updatedRoutine);
+    // Map snake_case fields to camelCase for frontend compatibility
+    const mappedRoutine = {
+      ...updatedRoutine,
+      taskName: updatedRoutine.task_name,
+      startTime: updatedRoutine.start_time,
+      endTime: updatedRoutine.end_time,
+    };
+
+    return NextResponse.json(mappedRoutine);
   } catch (error) {
     console.error("Error updating routine:", error);
     return NextResponse.json(
